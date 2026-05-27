@@ -136,17 +136,22 @@ demonstrates for the script-engine side.
 
 `Rust 2024` · `clap` · `proptest` · `criterion` · `wiremock`
 
-Cross-platform malware-scanning CLI. **321 commits, 139 PRs, 110 issues** — review-driven
-development, not a one-off demo. Strongest pure-engineering signal in the portfolio outside the
-native-Android stack.
+Cross-platform malware-scanning CLI. **RCOS Project Lead of a 5-person team** at Rensselaer Center
+for Open Source — Spring 2026 MVP, presented at the RCOS Spring 2026 showcase. 321 commits, 139
+PRs, 110 issues — issue-driven team ownership, not a one-off demo. Strongest pure-engineering and
+team-leadership signal in the portfolio outside the native-Android stack.
 
+- **Team:** Jordan Ye (architecture / CI / db), Riley Horling (scanner / quarantine), Isaac Child
+  (CLI), Michael Wang (utilities), Alexander Santos (setup / docs) — plus 3 external contributors
 - **CI matrix:** Linux / macOS / Windows × x86_64 / ARM64 with pinned action SHAs
 - **Supply chain:** `cargo audit`, `cargo deny`, `cargo supply-chain`, SBOM generation,
   `unknown-registry = "deny"`, `unknown-git = "deny"`
 - **Correctness:** atomic database writes with rollback, quarantine-path validation with
   restrictive permissions, weekly signature-publish workflow with checksummed update artifacts
-- **Testing:** property tests via proptest, criterion benchmarks, wiremock-backed HTTP tests,
-  autograder-style CLI tests for new contributors
+- **Testing:** 174 automated tests, property tests via proptest, criterion benchmarks,
+  wiremock-backed HTTP tests, autograder-style CLI tests for new contributors
+- **Onboarding:** built an auto-graded starter-task track so new Rust contributors could ramp
+  without lowering the review bar; `validate_strict.sh` and CODEOWNERS keep the repo consistent
 - **CLI contract:** exit code `2` reserved for "found malware" so shells can distinguish detection
   from runtime failure
 
