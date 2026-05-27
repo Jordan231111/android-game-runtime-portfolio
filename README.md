@@ -43,6 +43,14 @@ environments. The framework covers:
 - ARM64 absolute branch patch primitives
 - feature registry, overlay controls, and native status reporting
 
+### ae-pcd-stamp-tracer-public
+
+Repository: https://github.com/Jordan231111/ae-pcd-stamp-tracer-public
+
+Public case study for my private `ae-pcd-stamp-tracer` repository. It explains the architecture,
+Cocos2d-x/Lua runtime research, dialogue/timer fast-iteration design, and AI-game research relevance
+without publishing target-specific implementation details.
+
 ### lsposed-universal-template
 
 Repository: https://github.com/Jordan231111/lsposed-universal-template
@@ -104,4 +112,3 @@ I have 5+ years of independent Android game modding and runtime systems experien
 mostly below the editor layer: Unity IL2CPP, Cocos2d-x/Lua, LSPosed/Xposed modules, native C++ hooks,
 engine detection, runtime state inspection, movement/collision logic, game-loop modification, and
 emulator-based testing.
-
