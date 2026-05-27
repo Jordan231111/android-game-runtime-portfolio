@@ -1,8 +1,8 @@
 # Android Game Runtime Systems Portfolio
 
 This repository is a public portfolio index for my Android game-runtime and engine-systems work.
-It summarizes the parts that are useful for interviews and research roles without publishing
-target-specific private code, proprietary assets, or exploit-oriented instructions.
+It summarizes the systems work most relevant to game-engine, simulation, automation, and AI research
+roles.
 
 ## Focus
 
@@ -106,7 +106,7 @@ development. They need infrastructure that can:
 My work is strongest at that boundary: Android runtime systems, engine internals, native hooks,
 instrumentation, and automation.
 
-## Interview Summary
+## Professional Summary
 
 I have 5+ years of independent Android game modding and runtime systems experience. My work is
 mostly below the editor layer: Unity IL2CPP, Cocos2d-x/Lua, LSPosed/Xposed modules, native C++ hooks,

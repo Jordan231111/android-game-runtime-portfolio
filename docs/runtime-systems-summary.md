@@ -1,6 +1,6 @@
-# Interview Talking Points
+# Runtime Systems Summary
 
-## Short Pitch
+## Short Summary
 
 My game-systems work is independent rather than studio employment, but it is deep runtime work. I
 have 5+ years of Android game modding experience, including Unity IL2CPP, Cocos2d-x/Lua, native C++
@@ -29,7 +29,7 @@ Good wording:
 > modules, native C++ hooks, metadata-based method and field resolution, emulator/root tooling, and
 > movement/collision/game-loop modification.
 
-## If Asked About Godot / Defold / Stride
+## Godot / Defold / Stride Positioning
 
 Be precise:
 
@@ -37,4 +37,3 @@ Be precise:
 > instrumentation across Android game engines and built detection/routing infrastructure for Unity,
 > Unreal, Cocos2d-x, Godot, and related native-heavy runtimes. My experience is deeper on the runtime
 > and systems side than on editor-level asset production.
-
