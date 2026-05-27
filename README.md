@@ -1,111 +1,188 @@
+<div align="center">
+
 # Android Game Runtime Systems Portfolio
 
-A curated index of my native-Android, ARM64, and runtime-instrumentation work. The systems most
-relevant to game-engine, simulation, automation, and AI-research roles are listed here so a reviewer
-does not need to dig through the rest of my GitHub.
+**Below-the-editor Android engineering — ARM64 patching, LSPosed/Xposed modules, IL2CPP analysis, and the verification scaffolding that keeps it honest.**
 
-## What This Work Covers
+<p>
+  <img src="https://img.shields.io/badge/Focus-Native_Android_Runtime-111827?style=flat-square" />
+  <img src="https://img.shields.io/badge/Years-5+-2EA043?style=flat-square" />
+  <img src="https://img.shields.io/badge/Shipped_★-100+-FFD33D?style=flat-square" />
+  <img src="https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey?style=flat-square" />
+</p>
 
-- **ARM64 patching primitives.** `/proc/self/maps` parsing, IDA-style signature scan, page-permission-aware
-  read/write, 16-byte `ldr x17, #8 / br x17 / <addr>` absolute-branch trampoline, ELF symbol-table
-  fallback for symbols not exposed through `dlsym`.
-- **Houdini / native-bridge correctness.** On x86_64 Android emulators with Houdini, the `arm64-v8a`
-  library loads as guest ARM64 with multiple aliased mappings for the same file offset. The framework
-  treats writes as alias-aware — every alias is patched, not just the one the verifier reads from —
-  because verifying at one address while gameplay continues to use another mapping is a real failure
-  mode that quieter tooling will not catch.
-- **LSPosed module scaffolding.** Modern `libxposed` API 101 entry points, `onPackageLoaded` +
-  `onPackageReady`, process-level scope filtering, ShadowHook integration, runtime feature registry,
-  movable overlay UI bound to feature toggles.
-- **Engine classification.** Library-name detection across Unity, Unreal, Cocos2d-x, Godot, Flutter,
-  React Native, and Xamarin targets — driven by `/proc/self/maps` and `nativeLibraryDir` scan, with
-  evidence reported back to the overlay.
-- **Unity IL2CPP analysis.** Metadata-resolved methods and fields against `libil2cpp.so`, fail-closed
-  resolution (refuse to install hooks against unresolved symbols rather than blind-patch), and
-  device-verified status counters.
-- **Emulator and rooted-device tooling.** Reproducible BlueStacks 5, BlueStacks Air (macOS), and MuMu
-  Player 12 root setup with Magisk, plus the operational glue (registry detection, JSON config
-  patching, `.bak` rollback, dry-run modes) that makes the workflows safe to run on real machines.
+</div>
 
-## Public Repositories
+> Curated index of my native-Android, ARM64, and runtime-instrumentation work. The systems most
+> relevant to game-engine, simulation, automation, and AI-research roles are listed here so a
+> reviewer doesn't have to dig through the rest of my GitHub.
 
-### ARM64 Houdini LSPosed Framework
+---
 
-**[arm64-houdini-lsposed-framework](https://github.com/Jordan231111/arm64-houdini-lsposed-framework)** · C++ · Java · NDK
+## At a Glance
 
-Self-contained ARM64 instrumentation framework. No third-party native inline-hook dependency, so it
-keeps working in Houdini/native-bridge emulators where general inline-hook libraries refuse to bind
-their ABI. Reusable parts:
+| Domain | Concrete Work |
+| --- | --- |
+| **ARM64 patching** | `/proc/self/maps` parser · IDA-style signature scan · page-permission-aware writes · 16-byte `ldr x17, #8 / br x17 / <addr>` absolute-branch trampoline · ELF symbol-table fallback when `dlsym` returns null |
+| **Houdini / native-bridge** | Alias-aware writes for `arm64-v8a` running on x86_64 emulators — every alias for the same file offset is patched, not just the one the verifier reads back from |
+| **LSPosed modules** | libxposed API 101 · dual `onPackageLoaded`/`onPackageReady` · process-scope filtering · ShadowHook via `JNI_OnLoad` / `RegisterNatives` · runtime feature registry · overlay UI bound per-feature |
+| **Engine detection** | Library-name classification across Unity, Unreal, Cocos2d-x, Godot, Flutter, React Native, and Xamarin via `nativeLibraryDir` + `/proc/self/maps` |
+| **Unity IL2CPP** | Metadata-resolved methods and fields against `libil2cpp.so` · fail-closed resolution · device-verified status counters |
+| **Emulator tooling** | BlueStacks 5, BlueStacks Air (macOS, SIP-aware), MuMu Player 12 · JSON config patching · `.bak` rollback · registry-based install discovery · dry-run modes |
+| **Rust systems** | Cross-platform CI matrix · `cargo audit` + `cargo deny` + SBOM · property tests · atomic DB ops · exit code `2` reserved for "found malware" |
 
-- `/proc/self/maps` parser with module range and base helpers
+---
+
+## Featured Repositories
+
+### Native Instrumentation
+
+<table>
+<tr><td width="100%">
+
+#### **[arm64-houdini-lsposed-framework](https://github.com/Jordan231111/arm64-houdini-lsposed-framework)**
+
+`C++` · `Java` · `Android NDK` · `ARM64`
+
+Self-contained ARM64 patching framework with **no third-party inline-hook dependency** — keeps
+working on Houdini/native-bridge emulators where general libraries refuse to bind their ABI.
+
+- `/proc/self/maps` parser with module range / base helpers
 - IDA-style ARM64 pattern parser and scanner
-- File-backed code reading for verifying original ARM64 bytes from mapped APK/SO pages
-- Houdini/native-bridge alias discovery and alias-aware writes
+- File-backed code reading to verify original ARM64 bytes from mapped APK/SO pages
+- Houdini alias discovery and alias-aware writes
 - `dlopen` / `dlsym` / `RTLD_DEFAULT` / manual ELF symbol-table fallback
 - 16-byte ARM64 absolute branch patch primitive
-- Patch records and framework status returned through JNI to Java overlay
+- Patch records and framework status returned through JNI to a Java overlay
 - Bounded waiting for game libraries that load after `Application.attach`
 
-The default framework installs no target-specific hooks — that is intentional. Target branches own
-offsets, signatures, object layouts, and replacement functions. The reusable part is the loader,
-scanner, verifier, and patcher.
+The default framework installs no target-specific hooks — that's intentional. The reusable part is
+the loader, scanner, verifier, and patcher.
 
-### LSPosed Universal Template
+</td></tr>
+<tr><td>
 
-**[lsposed-universal-template](https://github.com/Jordan231111/lsposed-universal-template)** · Java · NDK · ShadowHook
+#### **[lsposed-universal-template](https://github.com/Jordan231111/lsposed-universal-template)**
 
-Quick-start LSPosed module scaffold for authorized testing and rapid prototyping. Modern
-`libxposed` API 101, both `onPackageLoaded` and `onPackageReady` overridden for broad
-LSPosed/Vector compatibility, process-level scope defaults that skip push / crash / sandbox /
-anti-cheat-satellite processes unless opted in.
+`Java` · `Kotlin DSL` · `NDK` · `ShadowHook`
 
-`EngineDetector` classifies Unity, Unreal, Cocos2d-x, Godot, Flutter, React Native, and Xamarin
-targets at startup by matching well-known native libraries from `nativeLibraryDir` first
-(cheap, no `/proc` IO) and then `/proc/self/maps`. `FeatureRegistry` provides bool/float runtime
-flags with overlay-bound toggles and best-effort persistence. ShadowHook is registered via
-`JNI_OnLoad` + `RegisterNatives` so the `.so` symbol table does not advertise package-derived JNI
-export names. R8 obfuscates everything except the LSPosed entry point.
+Quick-start LSPosed module scaffold on the modern **libxposed API 101**. Process scope defaults
+skip push, crash, sandbox, and anti-cheat-satellite processes unless explicitly opted in.
 
-### ae-pcd-stamp-tracer — Public Case Study
+- `EngineDetector` classifies Unity / Unreal / Cocos2d-x / Godot / Flutter / React Native / Xamarin
+  from `nativeLibraryDir` first (no `/proc` IO) with `/proc/self/maps` fallback
+- `FeatureRegistry` bool/float runtime flags with overlay-bound toggles and persistence
+- ShadowHook registered via `JNI_OnLoad` + `RegisterNatives` so the `.so` symbol table doesn't
+  advertise package-derived JNI export names
+- R8 obfuscates everything except the LSPosed entry point
+- `configure-template.py` renames package, scope, metadata, and packaged `.so` name in one command
 
-**[ae-pcd-stamp-tracer-public](https://github.com/Jordan231111/ae-pcd-stamp-tracer-public)**
+</td></tr>
+<tr><td>
 
-Architecture and engineering write-up for a private engine-neutral instrumentation project that
-extended the universal template to a Cocos2d-x / Lua native-heavy Android runtime. Covers
-library-load and script-load boundaries as stable observation points, runtime verification as a
-first-class design constraint (every feature has a toggle, a status counter, logs, and a safe
-disabled state), and the difference between "skip the wait" and "fast-iterate while preserving
-every script side effect that mutates state."
+#### **[ae-pcd-stamp-tracer — Public Case Study](https://github.com/Jordan231111/ae-pcd-stamp-tracer-public)**
 
-The private repository itself is target-specific and is not published as raw code. Live
-walk-throughs available on request.
+Architecture write-up for a private engine-neutral instrumentation project that extended the
+universal template to a **Cocos2d-x / Lua native-heavy** Android runtime. Covers library-load and
+script-load boundaries as durable observation points, fail-closed verification, and the difference
+between "skip the wait" and "fast-iterate while preserving every script side effect that mutates
+flags, rewards, inventory, achievements, saves, or scene state."
+
+Live walk-through of the private repository available on request.
+
+</td></tr>
+</table>
+
+### Rust Systems
+
+<table>
+<tr><td>
+
+#### **[MalwareMinimizer ★5](https://github.com/Jordan231111/MalwareMinimizer)**
+
+`Rust 2024` · `clap` · `proptest` · `criterion` · `wiremock`
+
+Cross-platform malware-scanning CLI. **321 commits, 139 PRs, 110 issues** — review-driven
+development, not a one-off demo. Strongest pure-engineering signal in the portfolio.
+
+- **CI matrix:** Linux / macOS / Windows × x86_64 / ARM64 with pinned action SHAs
+- **Supply chain:** `cargo audit`, `cargo deny`, `cargo supply-chain`, SBOM generation,
+  `unknown-registry = "deny"`, `unknown-git = "deny"`
+- **Correctness:** atomic database writes with rollback, quarantine-path validation with
+  restrictive permissions, weekly signature-publish workflow with checksummed update artifacts
+- **Testing:** property tests via proptest, criterion benchmarks, wiremock-backed HTTP tests,
+  autograder-style CLI tests for new contributors
+- **CLI contract:** exit code `2` reserved for "found malware" so shells can distinguish detection
+  from runtime failure
+
+</td></tr>
+</table>
 
 ### Emulator and Device Tooling
 
-- **[BluestacksRoot](https://github.com/Jordan231111/BluestacksRoot)** ★64 — BlueStacks 5 root toolchain. Magisk integration, native C++ component, semantic + dynamic integrity-check bypass in Python, GitHub Actions release pipeline.
-- **[mumu-magisk-1click](https://github.com/Jordan231111/mumu-magisk-1click)** ★39 — MuMu Player 12 root setup. 60KB PowerShell that locates installs via the Windows uninstall registry (not hard-coded paths), patches `customer_config.json` / `vm_config.json` / `shell_config.json` via real JSON parsing, writes `.bak` files before first mutation, supports `--dry-run` and `--edition global\|chinese\|all`. CI diffs the bundled installer against MuMu's official download API.
-- **[bluestacks-air-oneclick-root](https://github.com/Jordan231111/bluestacks-air-oneclick-root)** — BlueStacks Air on macOS. SIP-aware: separate code paths for SIP-enabled (prints the patched file path for the user to copy) and SIP-disabled (fully automatic). Single curl-piped installer.
+<table>
+<tr><td>
+
+#### **[BlueStacksRoot ★64](https://github.com/Jordan231111/BluestacksRoot)**
+
+`Batch` · `C++` · `Python` · `GitHub Actions`
+
+One of the more widely used BlueStacks 5 rooting toolchains. Native Magisk component, semantic +
+dynamic integrity-check bypass in Python, full CI release pipeline.
+
+</td></tr>
+<tr><td>
+
+#### **[mumu-magisk-1click ★39](https://github.com/Jordan231111/mumu-magisk-1click)**
+
+`PowerShell` · `Batch`
+
+MuMu Player 12 root setup. 60KB PowerShell helper that locates installs via the Windows uninstall
+registry (not hard-coded paths), patches `customer_config.json` / `vm_config.json` /
+`shell_config.json` via real JSON parsing, writes `.bak` files before first mutation, supports
+`--dry-run` and `--edition global|chinese|all`. CI diffs the bundled installer against MuMu's
+official download API and opens an update PR when it changes.
+
+</td></tr>
+<tr><td>
+
+#### **[bluestacks-air-oneclick-root](https://github.com/Jordan231111/bluestacks-air-oneclick-root)**
+
+`Bash` · `macOS`
+
+BlueStacks Air on macOS. **SIP-aware:** separate code paths for SIP-enabled (prints the patched
+file path for the user to copy) and SIP-disabled (fully automatic). Single curl-piped installer.
+
+</td></tr>
+</table>
 
 This tooling layer is the reason the engineering above can be developed quickly: repeatable,
 reset-able test environments across BlueStacks (Windows + macOS) and MuMu, rooted, with Magisk
 present, without manual steps that drift between runs.
 
-## Why This Is Relevant For Game / AI-Game Research
+---
 
-AI work that uses real games as environments is usually bottlenecked below the editor layer:
-extracting runtime state, driving controlled actions, accelerating simulation loops, and verifying
-that side effects still fire in the intended order. That is exactly the surface my work has been
-operating on for five years — native hooks, engine internals, ARM64 patching, runtime
-instrumentation, and the verification scaffolding that keeps automated runs trustworthy.
+## Why This Is Relevant for Game and AI-Game Research
 
-## Professional Summary
+AI work that uses real games as environments is usually bottlenecked **below the editor layer**:
 
-Five years of independent Android runtime-systems work — Unity IL2CPP analysis, LSPosed/Xposed
-module development, native C++ hooks, ARM64 pattern scanning and patching, engine detection,
-runtime state inspection, and emulator/root tooling — alongside a clean systems-engineering
-signal in Rust (MalwareMinimizer: cross-platform CI, property tests, supply-chain enforcement,
-atomic database operations).
+- **Extracting runtime state** from a process that doesn't expose an API
+- **Driving controlled actions** against a game loop that wasn't designed for automation
+- **Accelerating simulation loops** without invalidating the state they produce
+- **Verifying** that side effects still fire in the intended order after every change
 
-Currently: AI Model Evaluation Contractor at Handshake AI.
+That's the surface my work has been operating on for five years — native hooks, engine internals,
+ARM64 patching, runtime instrumentation, and the verification scaffolding (status counters, logs,
+fail-closed defaults) that keeps automated runs trustworthy enough to ship.
 
-Computer Science + Mathematics, Rensselaer Polytechnic Institute.
+---
+
+## About
+
+| | |
+| --- | --- |
+| **Current role** | AI Model Evaluation Contractor — Handshake AI |
+| **Education** | Computer Science + Mathematics, Rensselaer Polytechnic Institute |
+| **LinkedIn** | [jordan-ye-100b86237](https://www.linkedin.com/in/jordan-ye-100b86237/) |
+| **GitHub** | [Jordan231111](https://github.com/Jordan231111) |
+| **Contact** | yejordan8888@gmail.com |
