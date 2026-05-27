@@ -2,13 +2,13 @@
 
 # Android Game Runtime Systems Portfolio
 
-**Below-the-editor Android engineering — ARM64 patching, LSPosed/Xposed modules, IL2CPP analysis, and the verification scaffolding that keeps it honest.**
+**Below-the-editor Android engineering — ARM64 patching, LSPosed/Xposed modules, IL2CPP analysis, engine-neutral runtime instrumentation, and the verification scaffolding that keeps it honest.**
 
 <p>
   <img src="https://img.shields.io/badge/Focus-Native_Android_Runtime-111827?style=flat-square" />
-  <img src="https://img.shields.io/badge/Years-5+-2EA043?style=flat-square" />
+  <img src="https://img.shields.io/badge/Experience-5+_years-2EA043?style=flat-square" />
   <img src="https://img.shields.io/badge/Shipped_★-100+-FFD33D?style=flat-square" />
-  <img src="https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/Tier-Engine_Internals-6D28D9?style=flat-square" />
 </p>
 
 </div>
@@ -27,15 +27,41 @@
 | **Houdini / native-bridge** | Alias-aware writes for `arm64-v8a` running on x86_64 emulators — every alias for the same file offset is patched, not just the one the verifier reads back from |
 | **LSPosed modules** | libxposed API 101 · dual `onPackageLoaded`/`onPackageReady` · process-scope filtering · ShadowHook via `JNI_OnLoad` / `RegisterNatives` · runtime feature registry · overlay UI bound per-feature |
 | **Engine detection** | Library-name classification across Unity, Unreal, Cocos2d-x, Godot, Flutter, React Native, and Xamarin via `nativeLibraryDir` + `/proc/self/maps` |
-| **Unity IL2CPP** | Metadata-resolved methods and fields against `libil2cpp.so` · fail-closed resolution · device-verified status counters |
+| **Unity IL2CPP** | Metadata-resolved methods and fields against `libil2cpp.so` · fail-closed resolution · device-verified status counters · side-aware managed-type logic |
+| **Lua / Cocos2d-x runtime** | `luaL_loadbuffer` boundary inspection · script-load observation · coroutine-yield analysis · side-effect-preserving fast iteration |
 | **Emulator tooling** | BlueStacks 5, BlueStacks Air (macOS, SIP-aware), MuMu Player 12 · JSON config patching · `.bak` rollback · registry-based install discovery · dry-run modes |
 | **Rust systems** | Cross-platform CI matrix · `cargo audit` + `cargo deny` + SBOM · property tests · atomic DB ops · exit code `2` reserved for "found malware" |
 
 ---
 
-## Featured Repositories
+## Flagship Work
 
-### Native Instrumentation
+### **[ae-pcd-stamp-tracer — Engine-Neutral Runtime Instrumentation](https://github.com/Jordan231111/ae-pcd-stamp-tracer-public)** ★ Flagship
+
+`C++` · `Java` · `Lua` · `Python` · `NDK` · **~10K+ LOC · 5 years**
+
+The **applied layer** of my native-Android research trajectory: an engine-neutral runtime
+instrumentation system that proves the reusable foundations work at scale against a real
+Cocos2d-x / Lua native-heavy Android runtime. Verification-first design — every feature ships
+with a toggle, status counter, log line, and safe disabled state.
+
+The full technical case study covers:
+- **7 specific engineering problems solved** with their solutions (engine routing without source,
+  stable observation points over fixed RVAs, Houdini alias-aware patching, JNI symbol-table
+  stealth, fail-closed verification, side-effect-preserving fast iteration, process-scope
+  filtering)
+- Architecture lineage showing how `lsposed-universal-template` and
+  `arm64-houdini-lsposed-framework` feed into the application layer
+- Engineering principles ("boundaries over addresses," "verification is part of the feature")
+- Mermaid system-architecture diagram + module breakdown
+
+The private repository is target-specific; live walk-through available on request.
+
+**→ Read the full case study: [ae-pcd-stamp-tracer-public](https://github.com/Jordan231111/ae-pcd-stamp-tracer-public)**
+
+---
+
+## Native Instrumentation Foundations
 
 <table>
 <tr><td width="100%">
@@ -80,20 +106,28 @@ skip push, crash, sandbox, and anti-cheat-satellite processes unless explicitly 
 </td></tr>
 <tr><td>
 
-#### **[ae-pcd-stamp-tracer — Public Case Study](https://github.com/Jordan231111/ae-pcd-stamp-tracer-public)**
+#### **[Archero-LSPOSED-Mod](https://github.com/Jordan231111/Archero-LSPOSED-Mod)**
 
-Architecture write-up for a private engine-neutral instrumentation project that extended the
-universal template to a **Cocos2d-x / Lua native-heavy** Android runtime. Covers library-load and
-script-load boundaries as durable observation points, fail-closed verification, and the difference
-between "skip the wait" and "fast-iterate while preserving every script side effect that mutates
-flags, rewards, inventory, achievements, saves, or scene state."
+`C++` · `Java` · `Android NDK` · `Unity IL2CPP`
 
-Live walk-through of the private repository available on request.
+Applied Unity IL2CPP runtime-hook study against a live `arm64-v8a` target build (Archero v7.9.1).
+Demonstrates the IL2CPP side of the same engineering trajectory the Cocos2d-x case study
+demonstrates for the script-engine side.
+
+- Metadata-driven method and field resolution against `libil2cpp.so` (no fixed-RVA fallback at
+  install time — fail-closed if a symbol can't be resolved)
+- Side-aware logic in the IL2CPP managed-type system (`EntityBase.AddSkill` / `ContainsSkill`
+  resolution by metadata)
+- Per-feature toggle architecture with named status counters
+- Native trampoline placement; through-wall field discovery on hero bullet collision handlers
+- Authorized testing on owned devices only
 
 </td></tr>
 </table>
 
-### Rust Systems
+---
+
+## Rust Systems
 
 <table>
 <tr><td>
@@ -103,7 +137,8 @@ Live walk-through of the private repository available on request.
 `Rust 2024` · `clap` · `proptest` · `criterion` · `wiremock`
 
 Cross-platform malware-scanning CLI. **321 commits, 139 PRs, 110 issues** — review-driven
-development, not a one-off demo. Strongest pure-engineering signal in the portfolio.
+development, not a one-off demo. Strongest pure-engineering signal in the portfolio outside the
+native-Android stack.
 
 - **CI matrix:** Linux / macOS / Windows × x86_64 / ARM64 with pinned action SHAs
 - **Supply chain:** `cargo audit`, `cargo deny`, `cargo supply-chain`, SBOM generation,
@@ -118,7 +153,9 @@ development, not a one-off demo. Strongest pure-engineering signal in the portfo
 </td></tr>
 </table>
 
-### Emulator and Device Tooling
+---
+
+## Emulator and Device Tooling
 
 <table>
 <tr><td>
